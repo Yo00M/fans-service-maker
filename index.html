@@ -2,84 +2,63 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>饭撒牌编辑器 9.0 - 全自由排版</title>
-    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gamja+Flower&family=Nanum+Brush+Script&family=Single+Day&family=Montserrat:wght@900&family=Bungee&family=Fredoka+One&family=Noto+Sans+KR:wght@100..900&family=Jua&family=Dongle:wght@700&family=Gaegu:wght@700&family=Sunflower:wght@700&display=swap" rel="stylesheet">
+    <title>饭撒牌编辑器 10.0 - 稳定导出版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Do+Hyeon&family=Gamja+Flower&family=Nanum+Brush+Script&family=Single+Day&family=Montserrat:wght@900&family=Bungee&family=Fredoka+One&family=Noto+Sans+KR:wght@100..900&family=Jua&family=Dongle:wght@700&family=Gaegu:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --panel-width: 440px; --accent-color: #00ffcc; }
+        :root { --panel-width: 420px; --accent-color: #00ffcc; }
         body { font-family: 'Noto Sans KR', sans-serif; background-color: #0a0a0a; color: #fff; margin: 0; display: flex; height: 100vh; overflow: hidden; }
         
-        /* 侧边栏布局：分为文案库和调节区 */
+        /* 侧边栏 */
         .sidebar { width: var(--panel-width); background: #181818; padding: 20px; display: flex; flex-direction: column; gap: 15px; box-shadow: 5px 0 20px rgba(0,0,0,0.5); overflow-y: auto; }
-        h3 { margin: 0; font-size: 14px; color: var(--accent-color); text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid #333; padding-bottom: 8px; }
+        h3 { margin: 0; font-size: 14px; color: var(--accent-color); border-bottom: 1px solid #333; padding-bottom: 8px; text-transform: uppercase; }
         
-        /* 1. 文案库样式 */
-        .phrase-library { background: #222; border: 1px solid #333; border-radius: 8px; padding: 10px; max-height: 220px; overflow-y: auto; }
-        .lib-section-title { font-size: 11px; color: var(--accent-color); margin: 10px 0 5px; opacity: 0.8; }
-        .phrase-item { font-size: 12px; background: #333; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: 0.2s; }
-        .phrase-item:hover { background: #444; border-color: var(--accent-color); }
-        .phrase-zh { color: #888; font-size: 10px; }
+        /* 文案库 */
+        .phrase-library { background: #222; border: 1px solid #333; border-radius: 8px; padding: 10px; max-height: 180px; overflow-y: auto; }
+        .phrase-item { font-size: 12px; background: #333; padding: 8px 12px; border-radius: 6px; margin-bottom: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .phrase-item:hover { background: #444; }
 
-        /* 2. 动态调节卡片 */
+        /* 图层卡片 */
         .layer-card { background: #252525; border: 1px solid #444; border-radius: 8px; padding: 15px; position: relative; margin-top: 10px; border-left: 4px solid var(--accent-color); }
-        .layer-card:hover { border-color: var(--accent-color); }
         .remove-btn { position: absolute; right: 10px; top: 10px; color: #ff4444; cursor: pointer; font-size: 18px; }
         
         .control-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
         label { font-size: 10px; color: #999; margin-bottom: 4px; display: block; }
         input, select { background: #151515; border: 1px solid #333; color: white; padding: 8px; border-radius: 4px; font-size: 12px; width: 100%; box-sizing: border-box; }
-        input[type="range"] { padding: 0; }
 
-        /* 画布区域 */
+        /* 画布区 */
         .canvas-area { flex: 1; background: #000; display: flex; align-items: center; justify-content: center; padding: 40px; overflow: auto; }
-        #export-target { background-color: #000; position: relative; overflow: hidden; box-shadow: 0 0 60px rgba(0,0,0,0.5); }
-        .text-layer { position: absolute; white-space: nowrap; filter: url(#master-stroke); transform: translate(-50%, -50%); cursor: move; }
+        #export-target { background-color: #000; position: relative; overflow: hidden; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .text-layer { position: absolute; white-space: nowrap; transform: translate(-50%, -50%); cursor: move; }
 
-        .add-custom-btn { background: #333; border: 1px dashed var(--accent-color); color: var(--accent-color); padding: 12px; border-radius: 6px; text-align: center; cursor: pointer; font-weight: bold; font-size: 13px; }
+        .add-btn { background: #333; border: 1px dashed var(--accent-color); color: var(--accent-color); padding: 12px; border-radius: 6px; text-align: center; cursor: pointer; font-weight: bold; }
         .save-btn { background: var(--accent-color); color: #000; padding: 18px; border: none; border-radius: 8px; cursor: pointer; font-weight: 900; font-size: 15px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<svg width="0" height="0" style="position:absolute;">
-  <defs>
-    <filter id="master-stroke">
-      <feGaussianBlur stdDeviation="3" in="SourceAlpha" result="blur"/>
-      <feComponentTransfer in="blur" result="contour"><feFuncA type="linear" slope="30" intercept="-2"/></feComponentTransfer>
-      <feFlood id="global-stroke-color" flood-color="#ff00ff" result="color"/>
-      <feComposite in="color" in2="contour" operator="in" result="coloredContour"/>
-      <feMerge><feMergeNode in="coloredContour"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
-</svg>
-
 <div class="sidebar">
     <h3>1. 常用韩语饭撒库</h3>
     <div class="phrase-library" id="lib">
-        <div class="lib-section-title">互动类 (Action)</div>
-        <div class="phrase-item" data-val="손하트 해주세요!"><span>손하트 (指心)</span><span class="phrase-zh">做个手指哈特</span></div>
-        <div class="phrase-item" data-val="윙크 해주세요!"><span>Wink (眨眼)</span><span class="phrase-zh">眨个眼吧</span></div>
-        <div class="phrase-item" data-val="볼콕 해주세요!"><span>볼콕 (戳脸)</span><span class="phrase-zh">戳个脸颊吧</span></div>
-        
-        <div class="lib-section-title">告白类 (Love)</div>
-        <div class="phrase-item" data-val="평생 사랑할게"><span>永远爱</span><span class="phrase-zh">会一辈子爱你</span></div>
-        <div class="phrase-item" data-val="나만 봐줘!"><span>只看我</span><span class="phrase-zh">只看着我一个人吧</span></div>
-        <div class="phrase-item" data-val="오늘 너무 멋져"><span>帅气</span><span class="phrase-zh">今天也超级帅</span></div>
+        <div class="phrase-item" data-val="손하트 해주세요!"><span>手指哈特</span><span style="color:#888; font-size:10px;">做个手指心</span></div>
+        <div class="phrase-item" data-val="윙크 해주세요!"><span>眨眼 Wink</span><span style="color:#888; font-size:10px;">眨个眼吧</span></div>
+        <div class="phrase-item" data-val="볼콕 해주세요!"><span>戳脸颊</span><span style="color:#888; font-size:10px;">戳戳脸颊</span></div>
+        <div class="phrase-item" data-val="나만 봐줘!"><span>只看我</span><span style="color:#888; font-size:10px;">只看着我吧</span></div>
     </div>
 
     <h3>2. 全局基础设定</h3>
     <div class="control-row">
-        <div class="item"><label>画布底色</label><input type="color" id="global-bg" value="#000000"></div>
-        <div class="item"><label>描边颜色</label><input type="color" id="global-stroke" value="#ff00ff"></div>
+        <div><label>画布底色</label><input type="color" id="g-bg" value="#000000"></div>
+        <div><label>描边颜色</label><input type="color" id="g-stroke" value="#ff00ff"></div>
     </div>
-    <div class="item">
-        <label>描边粗细调节</label>
-        <input type="range" id="global-stroke-width" min="1" max="15" value="5">
+    <div>
+        <label>描边粗细 (导出厚度)</label>
+        <input type="range" id="g-stroke-w" min="1" max="20" value="8">
     </div>
 
     <div id="layers-list"></div>
 
-    <div class="add-custom-btn" id="add-new">+ 添加自定义文字块</div>
+    <div class="add-btn" id="add-layer">+ 添加自定义文字块</div>
     <button class="save-btn" id="save-image">导出高清 PNG 打印文件</button>
 </div>
 
@@ -88,15 +67,13 @@
 </div>
 
 <script>
-    const layersList = document.getElementById('layers-list');
+    const list = document.getElementById('layers-list');
     const canvas = document.getElementById('export-target');
-    let layerIdx = 0;
+    let layerCount = 0;
 
     function createLayer(text = "新文案") {
-        layerIdx++;
-        const id = `L${layerIdx}`;
-        
-        // 侧边栏卡片
+        layerCount++;
+        const id = `L${layerCount}`;
         const card = document.createElement('div');
         card.className = 'layer-card';
         card.id = `card-${id}`;
@@ -104,36 +81,34 @@
             <span class="remove-btn" onclick="removeLayer('${id}')">×</span>
             <input type="text" class="c-text" value="${text}" oninput="refresh()">
             <div class="control-row">
-                <div class="item"><label>左右 (X)</label><input type="range" class="c-x" min="0" max="100" value="50" oninput="refresh()"></div>
-                <div class="item"><label>上下 (Y)</label><input type="range" class="c-y" min="0" max="100" value="${(layerIdx * 15) % 90 + 10}" oninput="refresh()"></div>
+                <div><label>左右(X)</label><input type="range" class="c-x" min="0" max="100" value="50" oninput="refresh()"></div>
+                <div><label>上下(Y)</label><input type="range" class="c-y" min="0" max="100" value="${(layerCount*15)%80+10}" oninput="refresh()"></div>
             </div>
             <div class="control-row">
-                <div class="item"><label>字号大小</label><input type="number" class="c-size" value="110" oninput="refresh()"></div>
-                <div class="item"><label>文字颜色</label><input type="color" class="c-color" value="#ffff00" oninput="refresh()"></div>
+                <div><label>字号大小</label><input type="number" class="c-size" value="120" oninput="refresh()"></div>
+                <div><label>文字颜色</label><input type="color" class="c-color" value="#ffff00" oninput="refresh()"></div>
             </div>
             <div class="control-row">
-                <div class="item"><label>字体粗细</label><input type="range" class="c-weight" min="100" max="900" step="100" value="900" oninput="refresh()"></div>
-                <div class="item">
+                <div><label>字体粗细</label><input type="range" class="c-weight" min="100" max="900" step="100" value="900" oninput="refresh()"></div>
+                <div>
                     <label>字体风格</label>
                     <select class="c-font" oninput="refresh()">
                         <option value="'Black Han Sans'">超粗黑体</option>
                         <option value="'Jua'">圆润粗体</option>
-                        <option value="'Dongle'">超萌窄体</option>
+                        <option value="'Dongle'">萌系窄体</option>
                         <option value="'Gaegu'">淘气手写</option>
                         <option value="'Noto Sans KR'">标准多级</option>
                     </select>
                 </div>
             </div>
         `;
-        layersList.appendChild(card);
+        list.appendChild(card);
 
-        // 画布元素
         const el = document.createElement('div');
         el.className = 'text-layer';
         el.id = `text-${id}`;
         el.innerHTML = `<span>${text}</span>`;
         canvas.appendChild(el);
-        
         refresh();
     }
 
@@ -143,15 +118,15 @@
     }
 
     function refresh() {
-        // 同步全局
-        canvas.style.backgroundColor = document.getElementById('global-bg').value;
-        document.getElementById('global-stroke-color').setAttribute('flood-color', document.getElementById('global-stroke').value);
-        document.querySelector('feGaussianBlur').setAttribute('stdDeviation', document.getElementById('global-stroke-width').value);
+        // 同步全局底色
+        canvas.style.backgroundColor = document.getElementById('g-bg').value;
+        const sColor = document.getElementById('g-stroke').value;
+        const sWidth = document.getElementById('g-stroke-w').value;
 
-        // 同步各层
+        // 遍历同步所有图层
         document.querySelectorAll('.layer-card').forEach(card => {
-            const id = card.id.replace('card-', '');
-            const el = document.getElementById(`text-${id}`);
+            const id = card.id.replace('card-', 'text-');
+            const el = document.getElementById(id);
             const span = el.querySelector('span');
             
             span.innerText = card.querySelector('.c-text').value;
@@ -161,28 +136,40 @@
             el.style.color = card.querySelector('.c-color').value;
             el.style.fontWeight = card.querySelector('.c-weight').value;
             el.style.fontFamily = card.querySelector('.c-font').value;
+
+            // 核心修复：8方向重叠投影模拟描边，确保导出不失效
+            const w = sWidth + 'px';
+            span.style.textShadow = `
+                ${w} ${w} 0 ${sColor}, -${w} -${w} 0 ${sColor},
+                ${w} -${w} 0 ${sColor}, -${w} ${w} 0 ${sColor},
+                ${w} 0 0 ${sColor}, -${w} 0 0 ${sColor},
+                0 ${w} 0 ${sColor}, 0 -${w} 0 ${sColor}
+            `;
         });
     }
 
-    // 绑定库点击
-    document.getElementById('lib').addEventListener('click', (e) => {
+    document.getElementById('lib').onclick = (e) => {
         const item = e.target.closest('.phrase-item');
         if(item) createLayer(item.dataset.val);
-    });
+    };
 
-    document.getElementById('add-new').addEventListener('click', () => createLayer());
-    document.getElementById('global-bg').oninput = refresh;
-    document.getElementById('global-stroke').oninput = refresh;
-    document.getElementById('global-stroke-width').oninput = refresh;
+    document.getElementById('add-layer').onclick = () => createLayer();
+    document.getElementById('g-bg').oninput = refresh;
+    document.getElementById('g-stroke').oninput = refresh;
+    document.getElementById('g-stroke-w').oninput = refresh;
 
-    document.getElementById('save-image').addEventListener('click', () => {
-        html2canvas(canvas, { scale: 2 }).then(c => {
-            const a = document.createElement('a'); a.download = 'fansite_master.png'; a.href = c.toDataURL(); a.click();
+    document.getElementById('save-image').onclick = () => {
+        // 使用 scale: 2 确保打印级高清
+        html2canvas(canvas, { scale: 2, useCORS: true, backgroundColor: null }).then(c => {
+            const a = document.createElement('a');
+            a.download = `fansite_board_${Date.now()}.png`;
+            a.href = c.toDataURL("image/png");
+            a.click();
         });
-    });
+    };
 
-    // 初始生成
-    createLayer("나를 봐줘!");
+    // 初始加载一行
+    createLayer("손하트 해주세요!");
 </script>
 </body>
 </html>
